@@ -39,8 +39,24 @@ public class Main {
       ByteBuffer buffer=ByteBuffer.wrap(messageBytes);
 
       //skip the request api key(2 bytes) and the request api version(2 bytes) , 4 bytes in total
+      /*
+          request api key 2 bytes
+          request api version 2 bytes
+          correlation id 4 bytes
+
+
+       */
       buffer.getShort();
-      buffer.getShort();
+      short apiVersion=buffer.getShort();
+
+      short errorCode;
+
+      if(apiVersion<0 || apiVersion>4){
+         errorCode=35;
+      }else{
+         errorCode=0;
+      }
+
 
       int correlationId=buffer.getInt();
 
@@ -50,6 +66,7 @@ public class Main {
       ByteBuffer response=ByteBuffer.allocate(8);
       response.putInt(0);
       response.putInt(correlationId);
+      response.putShort(errorCode);
 
       out.write(response.array());
       out.flush();
