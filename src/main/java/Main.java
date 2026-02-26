@@ -4,7 +4,7 @@ import java.net.Socket;
 
 public class Main {
   public static void main(String[] args){
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
+  
     System.err.println("Logs from your program will appear here!");
 
   
@@ -17,8 +17,10 @@ public class Main {
       serverSocket = new ServerSocket(port);
 
       serverSocket.setReuseAddress(true);
-      
       clientSocket = serverSocket.accept();
+       
+      clientSocket.getOutputStream.write(new byte []{0,0,0,0,0,0,0,7});
+
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
     } finally {
