@@ -1,6 +1,9 @@
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 public class Main {
   public static void main(String[] args){
@@ -15,11 +18,41 @@ public class Main {
 
     try {
       serverSocket = new ServerSocket(port);
-
       serverSocket.setReuseAddress(true);
       clientSocket = serverSocket.accept();
-       
-      clientSocket.getOutputStream().write(new byte []{0,0,0,0,0,0,0,7});
+
+      InputStream in=clientSocket.getInputStream();
+      OutputStream out=clientSocket.getOutputStream();
+
+
+      //message size is 4 bytes
+      byte[] messageSizeInBytes=new byte[4];
+      in.read(messageSizeInBytes);
+
+      int messageSize= ByteBuffer.wrap(messageSizeInBytes).getInt();
+
+      //read the rest of the message ,we already have the size to read
+      byte[] messageBytes=new byte[messageSize];
+      in.read(messageBytes);
+
+
+      ByteBuffer buffer=ByteBuffer.wrap(messageBytes);
+
+      //skip the request api key(2 bytes) and the request api version(2 bytes) , 4 bytes in total
+      buffer.getShort();
+      buffer.getShort();
+
+      int correlationId=buffer.getInt();
+
+      System.out.println("Correlation id "+correlationId);
+
+      //sending response
+      ByteBuffer response=ByteBuffer.allocate(8);
+      response.putInt(0);
+      response.putInt(correlationId);
+
+      out.write(response.array());
+      out.flush();
 
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
