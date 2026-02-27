@@ -4,6 +4,8 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
   public static void main(String[] args) throws IOException{
@@ -20,13 +22,11 @@ public class Main {
     serverSocket = new ServerSocket(port);
     serverSocket.setReuseAddress(true);
 
+      ExecutorService threadPool= Executors.newVirtualThreadPerTaskExecutor();
 
       while(true){
           Socket clientSocket = serverSocket.accept();
-          new Thread(()->{
-              handleClient(clientSocket);
-          }).start();
-
+           threadPool.submit(()->handleClient(clientSocket));
       }
 
   }
