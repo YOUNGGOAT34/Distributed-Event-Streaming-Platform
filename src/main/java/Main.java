@@ -59,14 +59,43 @@ public class Main {
 
 
       int correlationId=buffer.getInt();
-
       System.out.println("Correlation id "+correlationId);
 
+
+//      00 00 00 13  // message_size:      19 bytes
+//      ab cd ef 12  // correlation_id:    (matches request)
+      //start of body.......
+//      00 00        // error_code:        0 (no error)
+//      02           // api_keys array length:    1 element
+//      00 12        // api_key:           18 (ApiVersions)
+//      00 00        // min_version:       0
+//      00 04        // max_version:       4
+//      00           // TAG_BUFFER:        empty
+//      00 00 00 00  // throttle_time_ms:  0
+//      00           // TAG_BUFFER:        empty
+      //end of body
+
+
+      ByteBuffer  body=ByteBuffer.allocate(15);
+
+      body.putShort((short)0);//error code
+      body.put((byte)2);// compact array length
+      body.putShort((short)18);//api key
+      body.putShort((short)0);//min version
+      body.putShort((short)4);//max version
+      body.put((byte)0);//tag buffer
+      body.putInt(0);//throttle time in ms
+      body.put((byte)0);//tag buffer
+
+
       //sending response
-      ByteBuffer response=ByteBuffer.allocate(8);
-      response.putInt(0);
+
+      int responseMessageSize=4+body.capacity(); //correlation id + body
+
+      ByteBuffer response=ByteBuffer.allocate(4+responseMessageSize);
+      response.putInt(responseMessageSize);
       response.putInt(correlationId);
-      response.putShort(errorCode);
+      response.put(body.array());
 
       out.write(response.array());
       out.flush();
