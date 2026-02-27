@@ -14,20 +14,22 @@ public class Main {
 
   
   
-    ServerSocket serverSocket = null;
 
     int port = 9092;
 
 
-    serverSocket = new ServerSocket(port);
-    serverSocket.setReuseAddress(true);
 
-      ExecutorService threadPool= Executors.newVirtualThreadPerTaskExecutor();
+    try( ServerSocket serverSocket = new ServerSocket(port);
+      ExecutorService threadPool= Executors.newVirtualThreadPerTaskExecutor()){
+          serverSocket.setReuseAddress(true);
 
-      while(true){
-          Socket clientSocket = serverSocket.accept();
-           threadPool.submit(()->handleClient(clientSocket));
+
+          while(true){
+              Socket clientSocket = serverSocket.accept();
+              threadPool.submit(()->handleClient(clientSocket));
+          }
       }
+
 
   }
 
